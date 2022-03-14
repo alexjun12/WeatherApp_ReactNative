@@ -4,8 +4,10 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Text, ScrollView, Dimensions, ActivityIndicator} from 'react-native';
 
 const { width:SCREEN_WIDTH } = Dimensions.get("window");
+//get Demensions API from ReactNative to get users phone width, define with name 'SCREEN_WIDTH'
 
 const API_KEY = "83e4e300e0fb764221e49230cbcd6b22";
+//key for weather api -> in this case if you build this app, you must get this keycode from server
 
 export default function App() {
   const [city, setCity] = useState("Loading...");
@@ -15,27 +17,36 @@ export default function App() {
     const {granted} = await Location.requestForegroundPermissionsAsync();
     if(!granted){
       setOk(false);
+    }else{
+      const {coords:{latitude, longitude}} = await Location.getCurrentPositionAsync({accuracy:5});
+      const location = await Location.reverseGeocodeAsync({latitude, longitude}, {useGoogleMaps: false});
+      setCity(location[0].city);
+      const response = await fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=${latitude}&lon=${longitude}&exclude=alerts&appid=${API_KEY}&units=metric`);
+      const json = await response.json();
+      setDays(json.daily);
     }
-    const {coords:{latitude, longitude}} = await Location.getCurrentPositionAsync({accuracy:5});
-    const location = await Location.reverseGeocodeAsync({latitude, longitude}, {useGoogleMaps: false});
-    setCity(location[0].city);
-    const response = await fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=${latitude}&lon=${longitude}&exclude=alerts&appid=${API_KEY}&units=metric`);
-    const json = await response.json();
-    setDays(json.daily);
   }
+  //get weather information from api -> 1. ask user to get location 2. get latitude, longitude from Location 3. get city name from location 4. fetch api and get weather infos
   useEffect(() => {
     getWeather();
   },[]);
+  
   return (
     <View style={styles.container}>
       <StatusBar style="light" /> 
-      <View style={styles.city}>
-        <Text style={styles.cityName}>{city}</Text>
-      </View>
+      {ok ? (
+        <View style={styles.city}>
+          <Text style={styles.cityName}>{city}</Text>
+        </View>
+      ) : (
+        <View style={styles.city}>
+          <Text style={styles.cityName}>Give Us A Permission!!</Text>
+        </View>
+      )}
       <ScrollView pagingEnabled horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.weather}>
         {days.length === 0 ? (
         <View style={styles.day}>
-          <ActivityIndicator color="white" size="large" />
+          <ActivityIndicator color="yellow" size="large" />
         </View> 
         ) : (
         days.map((day,index) => <View key={index} style={styles.day}>
@@ -63,13 +74,12 @@ const styles = StyleSheet.create({
     color: "yellow",
     fontSize: 70,
     fontWeight: "500",
-    fontFamily: "tway_sky",
   },
   weather: {
   },
   day: {
     width: SCREEN_WIDTH,
-    //alignItems: "center",
+    alignItems: "center",
   },
   temp:{
     color: "yellow",
