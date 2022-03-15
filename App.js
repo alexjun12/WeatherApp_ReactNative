@@ -3,11 +3,32 @@ import { StatusBar } from 'expo-status-bar';
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Text, ScrollView, Dimensions, ActivityIndicator} from 'react-native';
 
+import { Fontisto } from '@expo/vector-icons';
+
 const { width:SCREEN_WIDTH } = Dimensions.get("window");
 //get Demensions API from ReactNative to get users phone width, define with name 'SCREEN_WIDTH'
 
 const API_KEY = "83e4e300e0fb764221e49230cbcd6b22";
 //key for weather api -> in this case if you build this app, you must get this keycode from server
+
+const icons = {
+  "Clouds": "cloudy",
+  "Clear": "day-sunny",
+  "Snow": "snowflake",
+  "Rain": "rains",
+  "Atmosphere": "cludy-gusts",
+  "Drizzle": "rain",
+  "Thunderstorm": "lightning",
+}
+const backColor = {
+  "Clouds": "darkgrey",
+  "Clear": "orange",
+  "Snow": "cyan",
+  "Rain": "blue",
+  "Atmosphere": "cyan",
+  "Drizzle": "cyan",
+  "Thunderstorm": "yellow",
+}
 
 export default function App() {
   const [city, setCity] = useState("Loading...");
@@ -46,11 +67,14 @@ export default function App() {
       <ScrollView pagingEnabled horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.weather}>
         {days.length === 0 ? (
         <View style={styles.day}>
-          <ActivityIndicator color="yellow" size="large" />
+          <ActivityIndicator color="white" size="large" />
         </View> 
         ) : (
         days.map((day,index) => <View key={index} style={styles.day}>
-          <Text style={styles.temp}>{parseFloat(day.temp.day).toFixed(0)}°</Text>
+          <View>
+            <Fontisto name={icons[day.weather[0].main]} size={80} color={backColor[day.weather[0].main]} />
+            <Text style={styles.temp}>{parseFloat(day.temp.day).toFixed(0)}°</Text>
+          </View>
           <Text style={styles.description}>{day.weather[0].main}</Text>
           <Text style={styles.tinyText}>{day.weather[0].description}</Text>
         </View>)
@@ -63,7 +87,7 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex:1,
-    backgroundColor:"#6937a1"
+    backgroundColor:"black",
   },
   city: {
     flex: 1,
@@ -71,7 +95,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   cityName: {
-    color: "yellow",
+    color: "white",
     fontSize: 70,
     fontWeight: "500",
   },
@@ -82,17 +106,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   temp:{
-    color: "yellow",
+    color: "white",
     fontSize: 200,
   },
   description: {
-    color: "yellow",
+    color: "white",
     marginTop: -30,
     fontSize: 60,
   },
   tinyText: {
     fontSize: 20,
-    color: "yellow",
+    color: "white",
   },
 }) 
   
